@@ -5,7 +5,9 @@ import products from '../data/products';
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
-  res.json(products);
+  setTimeout(() => {
+    return res.json([...products,...products,...products]);
+  }, 1000);
 });
 
 export default router;

@@ -1,11 +1,13 @@
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Product } from "~/@types/product";
 import type { Route } from "./+types";
 
 import { Products } from "~/components/Products";
+import { Spinner } from "~/components/Spinner";
+import { getProducts } from "~/services/api";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "CaseCellShop" },
     { name: "description", content: "Welcome to CaseCellShop!" },
@@ -15,23 +17,30 @@ export function meta({}: Route.MetaArgs) {
 export default function Home() {
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = async () => {
+    try {
+      const data = await getProducts();
+      setProducts(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/products");
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-        const data: Product[] = await response.json();
-        setProducts(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     fetchProducts();
   }, []);
+
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-gray-50">
+        <Spinner />
+      </main>
+    );
+  }
 
   return <Products products={products} />
 
